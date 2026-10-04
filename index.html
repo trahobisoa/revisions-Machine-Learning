@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master 2 ML - Plateforme Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* ===== SYSTÈME DE CARTES (CORRIGÉ ET ROBUSTE) ===== */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 1.5rem;
+        }
+        .flip-card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 1.5rem;
+            border: 1px solid #1e293b;
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Cacher le débordement global */
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+            background: #1e293b;
+        }
+        /* Conteneur interne pour le scroll de la réponse sans casser la 3D */
+        .card-content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Scrollbar esthétique */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+        /* ===== STYLES DU JEU D'ASSOCIATION ===== */
+        .match-item {
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 2px solid #334155;
+        }
+        .match-item:hover:not(.paired):not(.selected) {
+            border-color: #38bdf8;
+            background-color: #0f172a;
+        }
+        .match-item.selected {
+            border-color: #facc15; /* Jaune */
+            background-color: #1e293b;
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.2);
+            transform: scale(1.02);
+        }
+        .match-item.paired {
+            border-color: #22c55e; /* Vert */
+            background-color: #064e3b;
+            color: #a7f3d0;
+            opacity: 0.6;
+            cursor: default;
+        }
+        .match-item.error {
+            animation: shake 0.4s;
+            border-color: #ef4444; /* Rouge */
+            background-color: #7f1d1d;
+        }
+
+        /* ===== UTILITAIRES & ANIMATIONS ===== */
+        .math-formula {
+            background: #020617;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            color: #38bdf8;
+            font-size: 0.9rem;
+            text-align: center;
+            border: 1px solid #334155;
+            overflow-x: auto;
+        }
+        .cheat-card {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: transform 0.2s;
+        }
+        .cheat-card:hover { transform: translateY(-2px); border-color: #475569; }
+        .accordion-content {
+            max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        .accordion-item.active .accordion-content { max-height: 2000px; padding: 1rem 1.25rem; }
+        .accordion-item.active .accordion-icon { transform: rotate(180deg); }
+
+        @keyframes pop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: pop 0.4s ease-out forwards; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-3 sm:p-6">
+
+    <header class="w-full max-w-7xl flex flex-col mb-8 gap-4">
+        <div class="text-center">
+            <h1 class="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-400">
+                Machine Learning M2
+            </h1>
+        </div>
+        
+        <!-- Onglets -->
+        <div class="flex flex-wrap bg-slate-800 p-1.5 rounded-xl border border-slate-700 shadow-inner w-full justify-center gap-1 sm:gap-2">
+            <button id="tab-flashcards" onclick="switchTab('flashcards')" class="nav-btn flex-auto sm:flex-none px-3 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-lg bg-sky-500 text-slate-900 transition-all shadow-sm">
+                🗂️ Flashcards
+            </button>
+            <button id="tab-cheatsheets" onclick="switchTab('cheatsheets')" class="nav-btn flex-auto sm:flex-none px-3 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all">
+                📝 Synthèses
+            </button>
+            <button id="tab-exam" onclick="switchTab('exam')" class="nav-btn flex-auto sm:flex-none px-3 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all">
+                🎓 Annales Examen
+            </button>
+            <button id="tab-match" onclick="switchTab('match')" class="nav-btn flex-auto sm:flex-none px-3 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all">
+                🧩 Jeu d'Association
+            </button>
+            <button id="tab-visuel" onclick="switchTab('visuel')" class="nav-btn flex-auto sm:flex-none px-3 sm:px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-lg text-slate-400 hover:text-slate-200 transition-all">
+                🖼️ Bilan Visuel
+            </button>
+        </div>
+    </header>
+
+    <main class="w-full max-w-7xl flex-1 flex flex-col items-center justify-start relative">
+        
+        <div id="view-flashcards" class="w-full max-w-2xl flex flex-col items-center animate-pop">
+            
+            <nav class="w-full flex flex-wrap gap-2 mb-6 justify-center" id="category-filters"></nav>
+
+            <div class="w-full bg-slate-800 rounded-full h-4 border border-slate-700 relative overflow-hidden mb-6 shadow-inner">
+                <div id="progress-bar" class="bg-gradient-to-r from-sky-500 to-indigo-500 h-full transition-all duration-500 w-0"></div>
+                <span id="progress-text" class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white shadow-sm">0/0</span>
+            </div>
+
+            <!-- Écran de fin -->
+            <div id="completion-screen" class="hidden flex-col items-center justify-center text-center p-8 bg-slate-800 rounded-3xl border border-slate-700 w-full min-h-[400px]">
+                <span class="text-6xl mb-4">🏆</span>
+                <h2 class="text-2xl font-bold mb-2 text-white">Révision de cette catégorie terminée !</h2>
+                <p class="text-slate-400 mb-6">Vous maitrisez ces concepts. Continuez comme ça pour l'examen.</p>
+                <button onclick="resetDeck()" class="px-6 py-3 bg-sky-500 hover:bg-sky-400 text-slate-900 font-bold rounded-xl transition-colors shadow-lg">Recommencer</button>
+            </div>
+
+            <!-- Carte de révision -->
+            <div id="flashcard-container" class="perspective-1000 w-full h-[450px]">
+                <div id="flashcard" class="flip-card-inner cursor-pointer" onclick="flipCard()">
+                    
+                    <!-- Recto (Question) -->
+                    <div class="flip-card-front justify-center items-center p-6 text-center">
+                        <span id="card-category" class="absolute top-4 left-4 px-3 py-1 bg-slate-800 text-sky-400 text-xs font-semibold rounded-full border border-slate-700">Catégorie</span>
+                        <h2 id="card-question" class="text-2xl sm:text-3xl font-bold leading-tight mt-6 text-balance text-white">Question ?</h2>
+                        <div class="absolute bottom-6 flex items-center gap-2 text-slate-400 text-sm animate-pulse bg-slate-800/80 px-4 py-2 rounded-full">
+                            <span>👆</span> Cliquez sur la carte pour révéler la réponse
+                        </div>
+                    </div>
+                    
+                    <!-- Verso (Réponse) -->
+                    <div class="flip-card-back">
+                        <div class="card-content-scroll">
+                            <div class="flex justify-between items-start mb-4 border-b border-slate-700 pb-2">
+                                <h3 class="text-lg font-bold text-sky-400">Réponse Détaillée</h3>
+                                <span class="text-xs text-slate-500">Cliquez au centre pour retourner</span>
+                            </div>
+                            <div id="card-answer" class="text-slate-200 text-sm sm:text-base leading-relaxed space-y-3 flex-1"></div>
+                            <div id="card-visual" class="mt-4 w-full flex justify-center bg-slate-900 rounded-xl p-3 border border-slate-800"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Contrôles -->
+            <div id="controls" class="w-full flex gap-4 mt-6 opacity-0 transition-opacity duration-300 pointer-events-none">
+                <button onclick="markCard(false, event)" class="flex-1 py-3 sm:py-4 bg-slate-800 hover:bg-slate-700 text-red-400 font-bold rounded-xl border border-red-900/30 transition-colors shadow-lg active:scale-95">
+                    ❌ À revoir
+                </button>
+                <button onclick="markCard(true, event)" class="flex-1 py-3 sm:py-4 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg shadow-sky-500/20 transition-colors active:scale-95">
+                    ✅ Je savais
+                </button>
+            </div>
+        </div>
+
+        <div id="view-match" class="hidden w-full max-w-5xl flex-col items-center animate-pop pb-12">
+            
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6 w-full text-center">
+                <h2 class="text-2xl font-bold text-white mb-2">Jeu d'Association : Modèles & Caractéristiques</h2>
+                <p class="text-slate-400 text-sm mb-4">Associez chaque algorithme (à gauche) à sa définition ou particularité exacte (à droite).</p>
+                <div class="flex justify-center gap-4 text-sm font-semibold">
+                    <span class="text-sky-400 bg-sky-900/30 px-3 py-1 rounded">Score: <span id="match-score">0</span>/<span id="match-total">0</span></span>
+                    <button onclick="resetMatchingGame()" class="text-slate-300 underline hover:text-white">Réinitialiser le jeu</button>
+                </div>
+            </div>
+
+            <!-- Grille du jeu -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full relative">
+                
+                <!-- Colonne Algos -->
+                <div class="flex flex-col gap-3" id="match-col-algos">
+                    <!-- Rempli en JS -->
+                </div>
+
+                <!-- Colonne Définitions -->
+                <div class="flex flex-col gap-3" id="match-col-defs">
+                    <!-- Rempli en JS -->
+                </div>
+
+                <!-- Ligne de connexion visuelle (cachée sur mobile) -->
+                <div id="match-victory" class="hidden absolute inset-0 bg-slate-900/80 backdrop-blur-sm z-10 flex-col items-center justify-center rounded-xl border border-green-500/50">
+                    <span class="text-6xl mb-4">🎉</span>
+                    <h3 class="text-3xl font-bold text-green-400 mb-4">Parfait !</h3>
+                    <p class="text-white mb-6">Vous avez associé tous les concepts correctement.</p>
+                    <button onclick="resetMatchingGame()" class="px-6 py-2 bg-green-500 hover:bg-green-400 text-slate-900 font-bold rounded-lg transition-colors">Rejouer</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-visuel" class="hidden w-full max-w-5xl flex-col items-center animate-pop pb-12">
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6 w-full text-center">
+                <h2 class="text-2xl font-bold text-white mb-2">Bilan Visuel : Machine Learning Cheatsheet</h2>
+                <p class="text-slate-400 text-sm">Voici la vue d'ensemble des algorithmes que vous devez retenir. Analysez les colonnes "Pros", "Cons" et "Use Case" pour l'examen.</p>
+            </div>
+            
+            <div class="w-full bg-white rounded-xl p-2 shadow-2xl border border-slate-600 overflow-hidden relative group">
+                <p class="text-slate-500 text-xs text-center mb-2 bg-slate-100 p-2 rounded">
+                    Image source: "image_0ed21e.jpg" - Fiche de synthèse (Supervisé, Non-Supervisé, Avantages, Inconvénients)
+                </p>
+                <!-- Image Responsive avec capacité d'agrandissement -->
+                <div class="overflow-auto max-h-[80vh] w-full bg-gray-50 flex justify-center">
+                    <img src="image_0ed21e.jpg" alt="Machine Learning Algorithms Cheatsheet" 
+                         class="max-w-full h-auto object-contain"
+                         onerror="this.onerror=null; this.src='https://placehold.co/800x1200/1e293b/38bdf8?text=Image+Non+Trouvée\n(image_0ed21e.jpg+absente+du+dossier)'">
+                </div>
+            </div>
+        </div>
+
+        <div id="view-cheatsheets" class="hidden grid-cols-1 md:grid-cols-2 gap-6 w-full pb-12 animate-pop">
+            
+            <!-- Fiche 1 : Supervisé -->
+            <div class="cheat-card flex flex-col">
+                <h2 class="text-xl font-bold text-sky-400 mb-4 border-b border-slate-700 pb-3 flex items-center gap-2">
+                    1. Apprentissage Supervisé
+                </h2>
+                <div class="flex-1 space-y-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-emerald-400 mb-1">Régression Linéaire (MCO)</h3>
+                        <p class="text-xs text-slate-300 mb-1">Prédit une variable continue. Minimise la somme des carrés des résidus.</p>
+                        <div class="math-formula bg-slate-900/80">ω̂ = (XᵀX)⁻¹ Xᵀy</div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-emerald-400 mb-1">Naïf Bayésien</h3>
+                        <p class="text-xs text-slate-300 mb-1">Classification basée sur Bayes. Hypothèse "naïve" : les caractéristiques sont indépendantes conditionnellement à la classe.</p>
+                        <div class="math-formula bg-slate-900/80">P(Y|X) ∝ P(Y) ∏ P(Xi|Y)</div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-emerald-400 mb-1">Arbres de Décision & Random Forest</h3>
+                        <p class="text-xs text-slate-300">Sépare les données pour maximiser le <strong>Gain d'Information</strong> (minimiser l'entropie). <br><em>Random Forest</em> = ensemble d'arbres pour réduire le sur-apprentissage.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fiche 2 : Non Supervisé & Préparation -->
+            <div class="cheat-card flex flex-col">
+                <h2 class="text-xl font-bold text-purple-400 mb-4 border-b border-slate-700 pb-3 flex items-center gap-2">
+                    2. Non Supervisé & Préparation
+                </h2>
+                <div class="flex-1 space-y-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-fuchsia-400 mb-2">Clustering : K-Means</h3>
+                        <p class="text-xs text-slate-300 mb-2">Partitionne en <em>k</em> clusters. Itératif : Assigne au centroïde le plus proche, puis recalcule le centroïde (moyenne).</p>
+                        <div class="bg-slate-900 p-3 rounded text-xs border border-slate-700 text-slate-400">
+                            <strong>Astuce Examen :</strong> Utilisez la "méthode du coude" (Elbow) sur la courbe SSE pour trouver le k optimal.
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-fuchsia-400 mb-2">Pipeline de Préparation (Data Leakage)</h3>
+                        <p class="text-xs text-slate-300 mb-2"><strong>Règle d'or :</strong> Ne jamais utiliser les données de Test pour imputer (ex: médiane) ou scaler les données d'entraînement. Toujours utiliser un objet `Pipeline` en Python.</p>
+                        <ol class="list-decimal pl-4 text-xs text-slate-400 space-y-1">
+                            <li>Imputation (médiane pour résister aux outliers)</li>
+                            <li>Standardisation (moyenne=0, écart-type=1)</li>
+                            <li>Modèle (ex: LinearRegression)</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fiche 3 : Métriques -->
+            <div class="cheat-card flex flex-col md:col-span-2">
+                <h2 class="text-xl font-bold text-orange-400 mb-4 border-b border-slate-700 pb-3 flex items-center gap-2">
+                    3. Évaluation & Métriques
+                </h2>
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="flex-1">
+                        <h3 class="text-sm font-bold text-amber-400 mb-2">Classification : Matrice & Formules</h3>
+                        <ul class="space-y-2 text-xs text-slate-300 bg-slate-900/50 p-3 rounded border border-slate-700">
+                            <li><strong>Exactitude (Accuracy) :</strong> (TP+TN) / Total. <em>Attention si classes déséquilibrées.</em></li>
+                            <li><strong>Rappel (Sensibilité) :</strong> TP / (TP+FN). <em>Crucial en médecine : ne pas rater de malade (minimiser FN).</em></li>
+                            <li><strong>Précision :</strong> TP / (TP+FP). <em>Fiabilité de l'alerte.</em></li>
+                            <li><strong>F1-Score :</strong> Moyenne harmonique 2×(P×R)/(P+R).</li>
+                        </ul>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-bold text-amber-400 mb-2">Régression</h3>
+                        <ul class="space-y-2 text-xs text-slate-300 bg-slate-900/50 p-3 rounded border border-slate-700">
+                            <li><strong>MSE / RMSE :</strong> Pénalise fortement les grandes erreurs.</li>
+                            <li><strong>Score R² :</strong> Proportion de variance expliquée. Si R² < 0, le modèle est pire que prédire la moyenne.</li>
+                        </ul>
+                        <h3 class="text-sm font-bold text-amber-400 mt-4 mb-2">Sur-apprentissage (Overfitting)</h3>
+                        <p class="text-xs text-slate-300">La perte (Loss) <em>Train</em> baisse, mais la perte <em>Validation</em> stagne ou remonte. <br><strong>Solutions :</strong> Early Stopping, Dropout, Data Augmentation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fiche 4 : Deep Learning (CNN) -->
+            <div class="cheat-card flex flex-col md:col-span-2">
+                <h2 class="text-xl font-bold text-pink-400 mb-4 border-b border-slate-700 pb-3 flex items-center gap-2">
+                    4. Deep Learning : CNN & Architectures
+                </h2>
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="flex-1">
+                        <h3 class="text-sm font-bold text-rose-400 mb-2">Concepts Clés</h3>
+                        <ul class="space-y-2 text-xs text-slate-300">
+                            <li><strong>Convolution :</strong> Filtres glissants extrayant des caractéristiques spatiales locales (contours).</li>
+                            <li><strong>Max Pooling :</strong> Réduit la dimension, conserve le pixel max. Rend robuste aux petites translations.</li>
+                            <li><strong>Dropout :</strong> Désactive un % de neurones (ex: 25%) durant l'entraînement. Empêche la mémorisation par cœur.</li>
+                            <li><strong>Adam / Nadam :</strong> Optimiseurs adaptant le taux d'apprentissage. Plus efficaces que SGD pur.</li>
+                        </ul>
+                    </div>
+                    <div class="flex-1 bg-slate-900/50 p-3 rounded border border-slate-700">
+                        <h3 class="text-sm font-bold text-rose-400 mb-2">Architectures de Segmentation</h3>
+                        <ul class="space-y-2 text-xs text-slate-300">
+                            <li><strong>FCN (Fully Convolutional Network) :</strong> Termine par une déconvolution (Unpooling). <em>FCN-8</em> (noyau petit) est plus précis mais plus lent à entraîner que <em>FCN-32</em>.</li>
+                            <li><strong>U-Net :</strong> Architecture en "U". Utilise des connexions résiduelles (Bridges) entre la phase de descente (convolution) et de remontée (déconvolution) pour une précision médicale optimale.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-exam" class="hidden w-full max-w-4xl flex-col gap-4 pb-12 animate-pop">
+            <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-4">
+                <h2 class="text-2xl font-bold text-white mb-2">Annales & Questions Fréquentes</h2>
+                <p class="text-slate-400 text-sm">Cliquez sur une question issue des examens passés pour révéler la correction attendue par les correcteurs.</p>
+            </div>
+
+            <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
+                    <span class="font-bold text-sky-400">Examen Q1. Quelles sont les grandes étapes de l'évolution de l'Intelligence Artificielle ?</span>
+                    <span class="text-slate-400 transition-transform accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
+                    <p class="mb-2"><strong>Réponse attendue :</strong></p>
+                    <ul class="list-disc pl-5 space-y-2 mb-2">
+                        <li><strong>Années 1940-1950 :</strong> Période de gestation. Neurone artificiel (1943) et Machine de Turing (1950).</li>
+                        <li><strong>1956 :</strong> Naissance officielle du terme "Intelligence Artificielle" à la conférence de Dartmouth.</li>
+                        <li><strong>Années 1970-1980 :</strong> Systèmes experts, mais "hiver de l'IA" dû à la limitation de la puissance de calcul.</li>
+                        <li><strong>Années 2000+ :</strong> Avènement des GPU.</li>
+                        <li><strong>2012 :</strong> Victoire d'un réseau profond (ImageNet), boom du Deep Learning moderne et transfert vers la vie quotidienne.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
+                    <span class="font-bold text-sky-400">Examen Q2. Interprétez la courbe d'erreur (Loss) Train vs Test.</span>
+                    <span class="text-slate-400 transition-transform accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
+                    <p class="mb-2"><em>Contexte : La courbe Train descend vers 0, mais la courbe Test stagne puis remonte.</em></p>
+                    <p class="mb-2"><strong>Réponse attendue :</strong></p>
+                    <p class="mb-2">C'est un cas typique de <strong>Sur-apprentissage (Overfitting)</strong>. Le réseau n'arrive plus à généraliser. Il apprend par cœur les données d'entraînement, y compris le bruit.</p>
+                    <p><strong>Solutions à proposer :</strong></p>
+                    <ul class="list-disc pl-5 space-y-1 mt-1">
+                        <li>Mettre en place un <strong>Early Stopping</strong> (arrêt prématuré).</li>
+                        <li>Ajouter une couche <strong>Dropout</strong> après les couches denses.</li>
+                        <li>Faire de la <strong>Data Augmentation</strong>.</li>
+                        <li>Vérifier que le jeu de validation est bien représentatif du domaine de définition.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
+                    <span class="font-bold text-sky-400">Examen Q3. Diagnostic Médical : Pourquoi privilégier le Rappel ?</span>
+                    <span class="text-slate-400 transition-transform accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
+                    <p class="mb-2"><strong>Réponse attendue :</strong></p>
+                    <p class="mb-2">Dans un contexte médical (ex: détection de tumeurs), un <strong>Faux Négatif (FN)</strong> est potentiellement catastrophique (un patient malade est considéré comme sain et ne sera pas traité).</p>
+                    <p>Un Faux Positif (FP) est moins grave (génère du stress et des examens supplémentaires, mais ne met pas la vie en danger immédiat).</p>
+                    <p class="mt-2">Il faut donc avoir un <strong>Rappel (Sensibilité) très élevé</strong> pour minimiser les FN, quitte à sacrifier un peu de Précision (ce qui va générer plus de FP).</p>
+                </div>
+            </div>
+            
+            <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
+                    <span class="font-bold text-sky-400">Examen Q4. Score R² de -4.76 : Interprétation ?</span>
+                    <span class="text-slate-400 transition-transform accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
+                    <p class="mb-2"><strong>Réponse attendue :</strong></p>
+                    <p>Un score R² négatif est <strong>très mauvais</strong>. Il indique que le modèle prédictif effectue des prédictions pires qu'un modèle "naïf" qui se contenterait de prédire systématiquement la moyenne des données. La famille de modèle choisie (ex: Régression Linéaire simple) n'est pas du tout pertinente pour ce problème.</p>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
+                    <span class="font-bold text-sky-400">Examen Q5. Qu'est-ce qu'une Ontologie ?</span>
+                    <span class="text-slate-400 transition-transform accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
+                    <p class="mb-2"><strong>Réponse attendue :</strong></p>
+                    <p>Une ontologie est un système de l'IA Symbolique permettant de formaliser, stocker et organiser des connaissances. Les instances ont des caractéristiques et héritent de concepts. Elle permet :</p>
+                    <ul class="list-disc pl-5 space-y-1 mt-1">
+                        <li>De partager et d'organiser des connaissances.</li>
+                        <li>D'établir une terminologie commune pour réduire les ambiguïtés.</li>
+                        <li>Aux connaissances d'être exploitées informatiquement par des systèmes experts.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // ----------------------------------------------------
+        // DONNÉES DES FLASHCARDS (ENRICHIES SELON ANNALES)
+        // ----------------------------------------------------
+        const flashcardsData = [
+            // PRÉPARATION & BASES
+            {
+                category: "Fondements",
+                question: "Quels sont les 4 critères définissant une IA selon le Test de Turing (1950) ?",
+                answer: "<ol class='list-decimal pl-5 space-y-1'><li>Traitement du langage naturel</li><li>Représentation des connaissances</li><li>Raisonnement automatisé</li><li>Capacité d'apprentissage (Machine Learning)</li></ol>"
+            },
+            {
+                category: "Fondements",
+                question: "Qu'est-ce qu'une Ontologie en IA Symbolique ?",
+                answer: "C'est un système de représentation permettant de formaliser, organiser et partager des connaissances. Elle définit des concepts, leurs propriétés et les relations (héritage) entre eux, servant souvent de base aux Systèmes Experts."
+            },
+            {
+                category: "Préparation",
+                question: "Pourquoi est-il crucial d'utiliser un objet 'Pipeline' (ex: avec scikit-learn) lors de la validation croisée ?",
+                answer: "Pour éviter la <strong>Fuite de Données (Data Leakage)</strong>. Si on impute la médiane globale avant de séparer Train/Test, le jeu de Test influence la médiane. Le Pipeline garantit que le prétraitement (scaler, médiane) est recalculé <em>uniquement</em> sur le jeu de Train à chaque fold."
+            },
+            
+            // SUPERVISÉ CLASSIQUE
+            {
+                category: "Supervisé",
+                question: "Quel est le principe et l'hypothèse 'naïve' du Classifieur Bayésien Naïf ?",
+                answer: "Il utilise le théorème de Bayes pour calculer la probabilité d'une classe. L'hypothèse naïve est que <strong>toutes les caractéristiques (attributs) sont indépendantes</strong> les unes des autres conditionnellement à la classe."
+            },
+            {
+                category: "Supervisé",
+                question: "Comment le classifieur Naïve Bayes gère-t-il des données continues (ex: taille, poids) ?",
+                answer: "On fait souvent l'hypothèse que les données suivent une <strong>distribution Normale (Gaussienne)</strong>. L'algorithme va estimer la moyenne (µ) et l'écart-type (σ) pour chaque classe à partir des données d'entraînement."
+            },
+            {
+                category: "Supervisé",
+                question: "Sur quel critère un Arbre de Décision choisit-il l'attribut pour couper (split) un nœud ?",
+                answer: "Il choisit l'attribut et la valeur qui maximisent le <strong>Gain d'Information</strong>, c'est-à-dire qui minimisent l'impureté (l'<strong>Entropie</strong>) des nœuds enfants créés."
+            },
+            
+            // METRIQUES
+            {
+                category: "Métriques",
+                question: "Donnez la formule et l'interprétation du Rappel (Sensibilité).",
+                answer: "<div class='math-formula mb-2'>Rappel = TP / (TP + FN)</div>C'est la capacité du modèle à <em>trouver tous les cas positifs réels</em> (minimiser les Faux Négatifs). Crucial en diagnostic médical."
+            },
+            {
+                category: "Métriques",
+                question: "Que signifie un score R² négatif lors d'une régression ?",
+                answer: "Un R² négatif indique que le modèle est <strong>pire</strong> qu'un modèle naïf qui se contenterait de toujours prédire la moyenne des valeurs observées. La famille de modèle choisie n'est pas adaptée."
+            },
+
+            // NON SUPERVISÉ
+            {
+                category: "Non Supervisé",
+                question: "Décrivez les étapes itératives de l'algorithme K-Means.",
+                answer: "<ol class='list-decimal pl-5 space-y-1'><li>Initialisation de k centroïdes aléatoires.</li><li><strong>Assignation :</strong> Associer chaque point au centroïde le plus proche.</li><li><strong>Mise à jour :</strong> Recalculer le centroïde (moyenne des points assignés).</li><li>Répéter 2 et 3 jusqu'à convergence.</li></ol>"
+            },
+            {
+                category: "Non Supervisé",
+                question: "Qu'est-ce que la 'Méthode du Coude' (Elbow) ?",
+                answer: "C'est une méthode visuelle pour choisir le nombre 'k' optimal de clusters. On trace la distorsion (SSE) en fonction de k, et on cherche le point d'inflexion (le coude) où l'erreur cesse de diminuer fortement."
+            },
+
+            // DEEP LEARNING / CNN
+            {
+                category: "Deep Learning",
+                question: "À quoi sert la couche de 'Dropout' et comment fonctionne-t-elle ?",
+                answer: "Elle sert à éviter le <strong>sur-apprentissage (overfitting)</strong>. Durant l'entraînement uniquement, elle désactive aléatoirement un pourcentage de neurones (ex: 25%) à chaque époque, forçant le réseau à généraliser plutôt qu'à mémoriser."
+            },
+            {
+                category: "Deep Learning",
+                question: "Quels sont les rôles de la Convolution et du Max Pooling dans un CNN ?",
+                answer: "<ul><li><strong>Convolution :</strong> Applique des filtres glissants pour extraire des caractéristiques spatiales (contours, textures).</li><li><strong>Max Pooling :</strong> Garde la valeur max d'un groupe de pixels. Réduit la taille spatiale et rend le modèle robuste aux petites translations.</li></ul>"
+            },
+            {
+                category: "Deep Learning",
+                question: "Qu'est-ce que le Unpooling (Déconvolution) dans des réseaux comme FCN ou U-Net ?",
+                answer: "C'est l'opération inverse du pooling. Utilisée dans les réseaux de <strong>segmentation d'images</strong>, elle permet de remonter en résolution spatiale pour reconstituer une image de sortie simplifiée (masque de segmentation) à partir des filtres profonds."
+            },
+            {
+                category: "Deep Learning",
+                question: "Quelle est la différence fondamentale entre les architectures FCN-8 et FCN-32 ?",
+                answer: "Cela correspond à la taille du noyau utilisé pour la déconvolution finale. <strong>FCN-8</strong> offre une segmentation spatiale plus précise (plus de détails conservés) mais est plus lent à entraîner que <strong>FCN-32</strong>."
+            },
+            {
+                category: "Deep Learning",
+                question: "Qu'apporte un optimiseur comme Adam ou Nadam par rapport à une Descente de Gradient classique ?",
+                answer: "Ils adaptent dynamiquement le <strong>taux d'apprentissage (learning rate)</strong> pour chaque paramètre. Ils utilisent le momentum pour accélérer dans les pentes fortes et ralentir aux abords de l'optimum pour ne pas le rater."
+            }
+        ];
+
+        // ----------------------------------------------------
+        // LOGIQUE DES ONGLETS
+        // ----------------------------------------------------
+        function switchTab(tabId) {
+            const tabs = ['flashcards', 'cheatsheets', 'exam', 'match', 'visuel'];
+            
+            tabs.forEach(t => {
+                const view = document.getElementById(`view-${t}`);
+                const btn = document.getElementById(`tab-${t}`);
+                
+                if (t === tabId) {
+                    view.classList.remove('hidden');
+                    view.classList.add(t === 'cheatsheets' ? 'grid' : 'flex');
+                    
+                    btn.classList.remove('text-slate-400', 'hover:text-slate-200');
+                    btn.classList.add('bg-sky-500', 'text-slate-900', 'shadow-sm');
+                } else {
+                    view.classList.add('hidden');
+                    view.classList.remove('flex', 'grid');
+                    
+                    btn.classList.remove('bg-sky-500', 'text-slate-900', 'shadow-sm');
+                    btn.classList.add('text-slate-400', 'hover:text-slate-200');
+                }
+            });
+        }
+
+        function toggleAccordion(element) {
+            const parent = element.parentElement;
+            parent.classList.toggle('active');
+        }
+
+        // ----------------------------------------------------
+        // LOGIQUE DU JEU D'ASSOCIATION
+        // ----------------------------------------------------
+        const matchData = [
+            { id: 1, algo: "Régression Linéaire", desc: "Prédit une valeur continue (MCO). Minimise la somme des carrés des résidus." },
+            { id: 2, algo: "Naïf Bayésien", desc: "Classification probabiliste supposant l'indépendance totale des attributs conditionnellement à la classe." },
+            { id: 3, algo: "Arbre de Décision", desc: "Partitionnement récursif aux nœuds pour maximiser le Gain d'Information (Entropie)." },
+            { id: 4, algo: "K-Means", desc: "Regroupe les données non labélisées en k clusters en minimisant la variance intra-cluster." },
+            { id: 5, algo: "CNN (Convolution)", desc: "Réseau utilisant des filtres locaux glissants et du Max Pooling, idéal pour l'analyse d'images." },
+            { id: 6, algo: "Dropout", desc: "Technique de régularisation qui désactive aléatoirement des neurones pour éviter l'overfitting." },
+            { id: 7, algo: "Adam / Nadam", desc: "Optimiseurs adaptant dynamiquement la vitesse d'inertie (taux d'apprentissage) aux abords de l'optimum." }
+        ];
+
+        let selectedAlgo = null;
+        let selectedDesc = null;
+        let matchScore = 0;
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function initMatchingGame() {
+            const colAlgos = document.getElementById('match-col-algos');
+            const colDefs = document.getElementById('match-col-defs');
+            
+            colAlgos.innerHTML = ''; colDefs.innerHTML = '';
+            matchScore = 0;
+            document.getElementById('match-score').innerText = matchScore;
+            document.getElementById('match-total').innerText = matchData.length;
+            document.getElementById('match-victory').classList.add('hidden');
+            document.getElementById('match-victory').classList.remove('flex');
+
+            selectedAlgo = null;
+            selectedDesc = null;
+
+            let algos = shuffle([...matchData]);
+            let defs = shuffle([...matchData]);
+
+            algos.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'match-item bg-slate-800 text-white font-bold p-4 rounded-xl text-center shadow-md select-none';
+                div.innerText = item.algo;
+                div.onclick = () => selectMatchItem(div, item.id, 'algo');
+                colAlgos.appendChild(div);
+            });
+
+            defs.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'match-item bg-slate-800 text-slate-300 text-sm p-4 rounded-xl text-center shadow-md select-none';
+                div.innerText = item.desc;
+                div.onclick = () => selectMatchItem(div, item.id, 'desc');
+                colDefs.appendChild(div);
+            });
+        }
+
+        function selectMatchItem(element, id, type) {
+            if (element.classList.contains('paired')) return;
+
+            // Remove previous selection of same type
+            const siblings = element.parentElement.children;
+            for(let el of siblings) {
+                el.classList.remove('selected');
+            }
+
+            element.classList.add('selected');
+
+            if (type === 'algo') selectedAlgo = { element, id };
+            if (type === 'desc') selectedDesc = { element, id };
+
+            if (selectedAlgo && selectedDesc) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const isMatch = selectedAlgo.id === selectedDesc.id;
+            const elAlgo = selectedAlgo.element;
+            const elDesc = selectedDesc.element;
+
+            if (isMatch) {
+                // Success
+                elAlgo.classList.replace('selected', 'paired');
+                elDesc.classList.replace('selected', 'paired');
+                matchScore++;
+                document.getElementById('match-score').innerText = matchScore;
+                
+                if (matchScore === matchData.length) {
+                    setTimeout(() => {
+                        document.getElementById('match-victory').classList.remove('hidden');
+                        document.getElementById('match-victory').classList.add('flex');
+                    }, 500);
+                }
+            } else {
+                // Error
+                elAlgo.classList.remove('selected');
+                elDesc.classList.remove('selected');
+                elAlgo.classList.add('error');
+                elDesc.classList.add('error');
+                
+                setTimeout(() => {
+                    elAlgo.classList.remove('error');
+                    elDesc.classList.remove('error');
+                }, 400);
+            }
+
+            selectedAlgo = null;
+            selectedDesc = null;
+        }
+
+        function resetMatchingGame() {
+            initMatchingGame();
+        }
+
+        let currentDeck = [];
+        let currentIndex = 0;
+        let isFlipped = false;
+        let activeCategory = "Toutes";
+
+        const elContainer = document.getElementById('flashcard-container');
+        const elCard = document.getElementById('flashcard');
+        const elControls = document.getElementById('controls');
+        const elQuestion = document.getElementById('card-question');
+        const elCategory = document.getElementById('card-category');
+        const elAnswer = document.getElementById('card-answer');
+        const elVisual = document.getElementById('card-visual');
+        const elFilters = document.getElementById('category-filters');
+        const elCompletion = document.getElementById('completion-screen');
+        const elProgressBar = document.getElementById('progress-bar');
+        const elProgressText = document.getElementById('progress-text');
+
+        function initFlashcards() {
+            const categories = ["Toutes", ...new Set(flashcardsData.map(c => c.category))];
+            
+            elFilters.innerHTML = categories.map(cat => 
+                `<button onclick="filterDeck('${cat}')" class="category-btn px-4 py-2 bg-slate-800 text-slate-300 rounded-full text-xs font-semibold border border-slate-700 transition-colors ${cat === 'Toutes' ? 'active shadow-sm bg-sky-500 text-slate-900 border-sky-400' : 'hover:bg-slate-700'}">
+                    ${cat}
+                </button>`
+            ).join('');
+
+            filterDeck("Toutes");
+        }
+
+        function filterDeck(category) {
+            activeCategory = category;
+            
+            // Mise à jour visuelle des boutons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if(btn.innerText.trim() === category) {
+                    btn.className = "category-btn px-4 py-2 rounded-full text-xs font-semibold transition-colors active shadow-sm bg-sky-500 text-slate-900 border border-sky-400";
+                } else {
+                    btn.className = "category-btn px-4 py-2 bg-slate-800 text-slate-300 rounded-full text-xs font-semibold border border-slate-700 transition-colors hover:bg-slate-700";
+                }
+            });
+
+            const filtered = category === "Toutes" 
+                ? [...flashcardsData] 
+                : flashcardsData.filter(c => c.category === category);
+            
+            // Mélanger le deck pour ne pas toujours avoir le même ordre
+            currentDeck = shuffle(filtered);
+            resetDeck();
+        }
+
+        function resetDeck() {
+            currentIndex = 0;
+            elCompletion.classList.add('hidden');
+            elCompletion.classList.remove('flex');
+            elContainer.classList.remove('hidden');
+            loadCard();
+        }
+
+        function loadCard() {
+            if (currentIndex >= currentDeck.length) {
+                showCompletion();
+                return;
+            }
+
+            // Réinitialiser l'état visuel de la carte
+            isFlipped = false;
+            elCard.classList.remove('flipped');
+            elControls.classList.add('opacity-0', 'pointer-events-none');
+
+            // Injecter le contenu (Face Avant)
+            const card = currentDeck[currentIndex];
+            elCategory.innerText = card.category;
+            elQuestion.innerText = card.question;
+            
+            // Injecter le contenu (Face Arrière)
+            elAnswer.innerHTML = card.answer;
+            
+            if (card.visual) {
+                elVisual.innerHTML = card.visual;
+                elVisual.classList.remove('hidden');
+            } else {
+                elVisual.innerHTML = '';
+                elVisual.classList.add('hidden');
+            }
+
+            updateProgress();
+        }
+
+        function flipCard() {
+            // Permet de retourner la carte si elle n'est pas retournée
+            // ou si l'utilisateur veut revoir la question
+            if (currentIndex < currentDeck.length) {
+                isFlipped = !isFlipped;
+                if (isFlipped) {
+                    elCard.classList.add('flipped'); 
+                    setTimeout(() => {
+                        elControls.classList.remove('opacity-0', 'pointer-events-none');
+                    }, 200);
+                } else {
+                    elCard.classList.remove('flipped'); 
+                }
+            }
+        }
+
+        function markCard(knewIt, event) {
+            event.stopPropagation(); // Empêche de déclencher le flip de la carte
+            
+            if (!knewIt) {
+                // Remet la carte à la fin du deck si on ne la savait pas
+                currentDeck.push(currentDeck[currentIndex]);
+            }
+            
+            currentIndex++;
+            
+            // Animation de passage à la carte suivante
+            elContainer.style.transform = 'scale(0.9)';
+            elContainer.style.opacity = '0';
+            
+            setTimeout(() => {
+                loadCard();
+                elContainer.style.transform = 'scale(1.05)';
+                
+                setTimeout(() => {
+                    elContainer.style.transform = 'scale(1)';
+                    elContainer.style.opacity = '1';
+                }, 100);
+            }, 300);
+        }
+
+        function updateProgress() {
+            const total = currentDeck.length;
+            const progress = (currentIndex / total) * 100;
+            elProgressBar.style.width = `${progress}%`;
+            elProgressText.innerText = `${currentIndex} / ${total}`;
+        }
+
+        function showCompletion() {
+            elContainer.classList.add('hidden');
+            elControls.classList.add('opacity-0', 'pointer-events-none');
+            
+            elCompletion.classList.remove('hidden');
+            elCompletion.classList.add('flex');
+            
+            elProgressBar.style.width = '100%';
+            elProgressText.innerText = `${currentDeck.length} / ${currentDeck.length}`;
+        }
+
+        // Lancement global
+        window.onload = function() {
+            initFlashcards();
+            initMatchingGame();
+            
+            // Par défaut, afficher les flashcards
+            switchTab('flashcards');
+        };
+    </script>
+</body>
+</html>

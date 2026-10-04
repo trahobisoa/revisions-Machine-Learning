@@ -260,13 +260,13 @@
             
             <div class="w-full bg-white rounded-xl p-2 shadow-2xl border border-slate-600 overflow-hidden relative group">
                 <p class="text-slate-500 text-xs text-center mb-2 bg-slate-100 p-2 rounded">
-                    Image source: "image_0ed21e.jpg" - Fiche de synthèse (Supervisé, Non-Supervisé, Avantages, Inconvénients)
+                    Image source: "cheatsheet_ML.jpeg" - Fiche de synthèse (Supervisé, Non-Supervisé, Avantages, Inconvénients)
                 </p>
                 <!-- Image Responsive avec capacité d'agrandissement -->
                 <div class="overflow-auto max-h-[80vh] w-full bg-gray-50 flex justify-center">
-                    <img src="image_0ed21e.jpg" alt="Machine Learning Algorithms Cheatsheet" 
+                    <img src="cheatsheet_ML.jpeg" alt="Machine Learning Algorithms Cheatsheet" 
                          class="max-w-full h-auto object-contain"
-                         onerror="this.onerror=null; this.src='https://placehold.co/800x1200/1e293b/38bdf8?text=Image+Non+Trouvée\n(image_0ed21e.jpg+absente+du+dossier)'">
+                         onerror="this.onerror=null; this.src='https://placehold.co/800x1200/1e293b/38bdf8?text=Image+Non+Trouvée\n(cheatsheet_ML.jpeg+absente+du+dossier)'">
                 </div>
             </div>
         </div>
@@ -283,6 +283,18 @@
                         <h3 class="text-sm font-bold text-emerald-400 mb-1">Régression Linéaire (MCO)</h3>
                         <p class="text-xs text-slate-300 mb-1">Prédit une variable continue. Minimise la somme des carrés des résidus.</p>
                         <div class="math-formula bg-slate-900/80">ω̂ = (XᵀX)⁻¹ Xᵀy</div>
+                        <!-- SVG Régression -->
+                        <div class="mt-2 w-full flex justify-center">
+                            <svg viewBox="0 0 200 80" class="w-full max-w-[200px] h-20">
+                                <line x1="10" y1="70" x2="190" y2="10" stroke="#38bdf8" stroke-width="2"/>
+                                <circle cx="30" cy="65" r="3" fill="#94a3b8"/><circle cx="70" cy="40" r="3" fill="#94a3b8"/>
+                                <circle cx="110" cy="45" r="3" fill="#94a3b8"/><circle cx="150" cy="20" r="3" fill="#94a3b8"/>
+                                <circle cx="180" cy="25" r="3" fill="#94a3b8"/>
+                                <!-- Lignes d'erreur résiduelle -->
+                                <line x1="70" y1="40" x2="70" y2="50" stroke="#ef4444" stroke-dasharray="2"/>
+                                <line x1="110" y1="45" x2="110" y2="37" stroke="#ef4444" stroke-dasharray="2"/>
+                            </svg>
+                        </div>
                     </div>
                     <div>
                         <h3 class="text-sm font-bold text-emerald-400 mb-1">Naïf Bayésien</h3>
@@ -292,6 +304,18 @@
                     <div>
                         <h3 class="text-sm font-bold text-emerald-400 mb-1">Arbres de Décision & Random Forest</h3>
                         <p class="text-xs text-slate-300">Sépare les données pour maximiser le <strong>Gain d'Information</strong> (minimiser l'entropie). <br><em>Random Forest</em> = ensemble d'arbres pour réduire le sur-apprentissage.</p>
+                        <!-- SVG Arbre de décision -->
+                        <div class="mt-2 w-full flex justify-center">
+                            <svg viewBox="0 0 200 80" class="w-full max-w-[200px] h-20">
+                                <rect x="80" y="5" width="40" height="15" rx="4" fill="#1e293b" stroke="#38bdf8" stroke-width="1"/>
+                                <text x="100" y="15" fill="#f8fafc" font-size="6" text-anchor="middle">H = 0.9</text>
+                                <path d="M100 20 L60 45 M100 20 L140 45" stroke="#475569" stroke-width="1.5"/>
+                                <rect x="40" y="45" width="40" height="15" rx="4" fill="#064e3b" stroke="#22c55e" stroke-width="1"/>
+                                <text x="60" y="55" fill="#f8fafc" font-size="6" text-anchor="middle">H = 0</text>
+                                <rect x="120" y="45" width="40" height="15" rx="4" fill="#7f1d1d" stroke="#ef4444" stroke-width="1"/>
+                                <text x="140" y="55" fill="#f8fafc" font-size="6" text-anchor="middle">H = 0.3</text>
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -305,6 +329,19 @@
                     <div>
                         <h3 class="text-sm font-bold text-fuchsia-400 mb-2">Clustering : K-Means</h3>
                         <p class="text-xs text-slate-300 mb-2">Partitionne en <em>k</em> clusters. Itératif : Assigne au centroïde le plus proche, puis recalcule le centroïde (moyenne).</p>
+                        <!-- SVG KMeans -->
+                        <div class="mt-2 mb-2 w-full flex justify-center">
+                            <svg viewBox="0 0 200 80" class="w-full max-w-[200px] h-20">
+                                <circle cx="60" cy="40" r="20" fill="#1e293b" stroke="#c084fc" stroke-dasharray="2"/>
+                                <circle cx="140" cy="40" r="20" fill="#1e293b" stroke="#c084fc" stroke-dasharray="2"/>
+                                <!-- Centroides -->
+                                <path d="M60 37 L63 43 L57 43 Z" fill="#e879f9"/>
+                                <path d="M140 37 L143 43 L137 43 Z" fill="#e879f9"/>
+                                <!-- Points -->
+                                <circle cx="55" cy="35" r="2" fill="#94a3b8"/><circle cx="65" cy="45" r="2" fill="#94a3b8"/><circle cx="50" cy="42" r="2" fill="#94a3b8"/>
+                                <circle cx="145" cy="35" r="2" fill="#94a3b8"/><circle cx="135" cy="45" r="2" fill="#94a3b8"/><circle cx="148" cy="42" r="2" fill="#94a3b8"/>
+                            </svg>
+                        </div>
                         <div class="bg-slate-900 p-3 rounded text-xs border border-slate-700 text-slate-400">
                             <strong>Astuce Examen :</strong> Utilisez la "méthode du coude" (Elbow) sur la courbe SSE pour trouver le k optimal.
                         </div>
@@ -382,7 +419,7 @@
 
             <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
                 <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
-                    <span class="font-bold text-sky-400">Examen Q1. Quelles sont les grandes étapes de l'évolution de l'Intelligence Artificielle ?</span>
+                    <span class="font-bold text-sky-400">Examen Q1. Quelles sont les grandes étapes de l'évolution de l'intelligence artificielle ?</span>
                     <span class="text-slate-400 transition-transform accordion-icon">▼</span>
                 </button>
                 <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
@@ -399,7 +436,7 @@
 
             <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
                 <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
-                    <span class="font-bold text-sky-400">Examen Q2. Interprétez la courbe d'erreur (Loss) Train vs Test.</span>
+                    <span class="font-bold text-sky-400">Examen Q2. Interprétez la courbe d'erreur (loss) train vs test.</span>
                     <span class="text-slate-400 transition-transform accordion-icon">▼</span>
                 </button>
                 <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
@@ -418,7 +455,7 @@
 
             <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
                 <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
-                    <span class="font-bold text-sky-400">Examen Q3. Diagnostic Médical : Pourquoi privilégier le Rappel ?</span>
+                    <span class="font-bold text-sky-400">Examen Q3. Diagnostic médical : pourquoi privilégier le rappel ?</span>
                     <span class="text-slate-400 transition-transform accordion-icon">▼</span>
                 </button>
                 <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
@@ -431,7 +468,7 @@
             
             <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
                 <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
-                    <span class="font-bold text-sky-400">Examen Q4. Score R² de -4.76 : Interprétation ?</span>
+                    <span class="font-bold text-sky-400">Examen Q5. Qu'est-ce qu'une ontologie ?</span>
                     <span class="text-slate-400 transition-transform accordion-icon">▼</span>
                 </button>
                 <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
@@ -442,7 +479,7 @@
 
             <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
                 <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
-                    <span class="font-bold text-sky-400">Examen Q5. Qu'est-ce qu'une Ontologie ?</span>
+                    <span class="font-bold text-sky-400">Examen Q7. Expliquez ce qu'est le raisonnement à partir de cas (RàPC).</span>
                     <span class="text-slate-400 transition-transform accordion-icon">▼</span>
                 </button>
                 <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
@@ -452,6 +489,83 @@
                         <li>De partager et d'organiser des connaissances.</li>
                         <li>D'établir une terminologie commune pour réduire les ambiguïtés.</li>
                         <li>Aux connaissances d'être exploitées informatiquement par des systèmes experts.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
+                    <span class="font-bold text-sky-400">Examen Q9. Qu'est-ce que le pooling et l'unpooling dans les CNN ?</span>
+                    <span class="text-slate-400 transition-transform accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
+                    <p class="mb-2"><strong>Réponse attendue :</strong></p>
+                    <ul class="list-disc pl-5 space-y-2 mb-2">
+                        <li><strong>Induction :</strong> Déduit des règles à partir de ses propres observations (ex: Machine Learning).</li>
+                        <li><strong>Déduction :</strong> Crée de nouvelles connaissances à partir de la connaissance théorique déjà acquise (ex: Systèmes Experts).</li>
+                        <li><strong>Abduction :</strong> Recherche des causes et part d'une relation bijective entre causes et effets.</li>
+                        <li><strong>Analogie :</strong> Résout une situation problématique en se fondant sur une situation similaire déjà résolue (ex: Raisonnement à Partir de Cas).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
+                    <span class="font-bold text-sky-400">Examen Q7. Expliquez ce qu'est le Raisonnement à Partir de Cas (RàPC).</span>
+                    <span class="text-slate-400 transition-transform accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
+                    <p class="mb-2"><strong>Réponse attendue :</strong></p>
+                    <p>C'est un système organisé autour d'une base de connaissances contenant des "cas sources" (problèmes déjà résolus). Le cycle de fonctionnement s'articule autour de 4 étapes :</p>
+                    <ol class="list-decimal pl-5 space-y-1 mt-2 mb-2">
+                        <li><strong>Remémoration :</strong> recherche du cas source le plus proche du problème cible.</li>
+                        <li><strong>Réutilisation :</strong> adaptation de la solution du cas source au problème cible.</li>
+                        <li><strong>Révision :</strong> évaluation et correction de la solution suggérée.</li>
+                        <li><strong>Rétention :</strong> mémorisation de ce nouveau cas résolu pour enrichir la base.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
+                    <span class="font-bold text-sky-400">Examen Q8. En quoi consiste la régression LASSO par rapport à la régression linéaire ?</span>
+                    <span class="text-slate-400 transition-transform accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
+                    <p class="mb-2"><strong>Réponse attendue :</strong></p>
+                    <p>Contrairement à la régression linéaire classique (MCO) qui minimise uniquement la somme des carrés des résidus, le modèle LASSO (Least Absolute Shrinkage and Selection Operator) ajoute un <strong>terme de pénalité absolue (norme L1)</strong> à la fonction objectif :</p>
+                    <p class="font-mono text-xs bg-slate-900 p-2 rounded mt-2 mb-2 text-center text-sky-300">Minimiser : MSE + α * Σ|βj|</p>
+                    <p><strong>Particularité :</strong> Cette fonction de pénalité n'étant pas dérivable en zéro, elle force certains coefficients (β) à devenir exactement nuls, ce qui en fait un excellent outil pour la <em>sélection de caractéristiques (Feature Selection)</em>.</p>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
+                    <span class="font-bold text-sky-400">Examen Q9. Qu'est-ce que le Pooling et l'Unpooling dans les CNN ?</span>
+                    <span class="text-slate-400 transition-transform accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
+                    <p class="mb-2"><strong>Réponse attendue :</strong></p>
+                    <ul class="list-disc pl-5 space-y-2 mb-2">
+                        <li><strong>Pooling (ex: Max Pooling) :</strong> Placé après la convolution, il ne conserve que la valeur du pixel le plus emblématique (ex: le max) d'un groupe de pixels. Il réduit la dimensionnalité spatiale et apporte une invariance aux petites translations.</li>
+                        <li><strong>Unpooling (Déconvolution) :</strong> C'est l'inverse. Utilisé dans les architectures de segmentation d'images (phase de décodage), il permet de remonter en résolution spatiale pour reconstituer une image simplifiée (masque de segmentation) à partir des filtres.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="accordion-item bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+                <button class="w-full text-left p-5 focus:outline-none flex justify-between items-center hover:bg-slate-750" onclick="toggleAccordion(this)">
+                    <span class="font-bold text-sky-400">Examen Q10. Comment fonctionne la rétropropagation du gradient ?</span>
+                    <span class="text-slate-400 transition-transform accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content bg-slate-900/50 px-5 text-slate-300 text-sm">
+                    <p class="mb-2"><strong>Réponse attendue :</strong></p>
+                    <p class="mb-2">La rétropropagation permet d'ajuster les poids des arcs (et les biais) pour minimiser l'erreur entre la sortie prédite et la sortie attendue. <strong>Le processus commence par la couche de sortie et remonte vers la couche d'entrée</strong>, en appliquant la règle de dérivation en chaîne (chain rule).</p>
+                    <p class="mb-1">Les variantes de la descente de gradient incluent :</p>
+                    <ul class="list-disc pl-5 space-y-1 mb-2">
+                        <li><strong>Batch Gradient Descent :</strong> Calcul de l'erreur sur tout le dataset avant la mise à jour des poids.</li>
+                        <li><strong>Stochastic Gradient Descent (SGD) :</strong> Mise à jour après chaque donnée individuelle.</li>
+                        <li><strong>Mini-batch :</strong> Un compromis, met à jour après un petit lot (batch) de données.</li>
                     </ul>
                 </div>
             </div>
@@ -468,42 +582,42 @@
             // PRÉPARATION & BASES
             {
                 category: "Fondements",
-                question: "Quels sont les 4 critères définissant une IA selon le Test de Turing (1950) ?",
+                question: "Quels sont les 4 critères définissant une IA selon le test de Turing (1950) ?",
                 answer: "<ol class='list-decimal pl-5 space-y-1'><li>Traitement du langage naturel</li><li>Représentation des connaissances</li><li>Raisonnement automatisé</li><li>Capacité d'apprentissage (Machine Learning)</li></ol>"
             },
             {
                 category: "Fondements",
-                question: "Qu'est-ce qu'une Ontologie en IA Symbolique ?",
-                answer: "C'est un système de représentation permettant de formaliser, organiser et partager des connaissances. Elle définit des concepts, leurs propriétés et les relations (héritage) entre eux, servant souvent de base aux Systèmes Experts."
+                question: "Qu'est-ce qu'une ontologie en IA symbolique ?",
+                answer: "C'est un système de représentation permettant de formaliser, organiser et partager des connaissances. Elle définit des concepts, leurs propriétés et les relations (héritage) entre eux, servant souvent de base aux systèmes experts."
             },
             {
                 category: "Préparation",
-                question: "Pourquoi est-il crucial d'utiliser un objet 'Pipeline' (ex: avec scikit-learn) lors de la validation croisée ?",
-                answer: "Pour éviter la <strong>Fuite de Données (Data Leakage)</strong>. Si on impute la médiane globale avant de séparer Train/Test, le jeu de Test influence la médiane. Le Pipeline garantit que le prétraitement (scaler, médiane) est recalculé <em>uniquement</em> sur le jeu de Train à chaque fold."
+                question: "Pourquoi est-il crucial d'utiliser un objet 'pipeline' (ex: avec scikit-learn) lors de la validation croisée ?",
+                answer: "Pour éviter la <strong>fuite de données (data leakage)</strong>. Si on impute la médiane globale avant de séparer Train/Test, le jeu de Test influence la médiane. Le pipeline garantit que le prétraitement (scaler, médiane) est recalculé <em>uniquement</em> sur le jeu de Train à chaque fold."
             },
             
             // SUPERVISÉ CLASSIQUE
             {
                 category: "Supervisé",
-                question: "Quel est le principe et l'hypothèse 'naïve' du Classifieur Bayésien Naïf ?",
+                question: "Quel est le principe et l'hypothèse 'naïve' du classifieur bayésien naïf ?",
                 answer: "Il utilise le théorème de Bayes pour calculer la probabilité d'une classe. L'hypothèse naïve est que <strong>toutes les caractéristiques (attributs) sont indépendantes</strong> les unes des autres conditionnellement à la classe."
             },
             {
                 category: "Supervisé",
-                question: "Comment le classifieur Naïve Bayes gère-t-il des données continues (ex: taille, poids) ?",
-                answer: "On fait souvent l'hypothèse que les données suivent une <strong>distribution Normale (Gaussienne)</strong>. L'algorithme va estimer la moyenne (µ) et l'écart-type (σ) pour chaque classe à partir des données d'entraînement."
+                question: "Comment le classifieur bayésien naïf gère-t-il des données continues (ex: taille, poids) ?",
+                answer: "On fait souvent l'hypothèse que les données suivent une <strong>distribution normale (gaussienne)</strong>. L'algorithme va estimer la moyenne (µ) et l'écart-type (σ) pour chaque classe à partir des données d'entraînement."
             },
             {
                 category: "Supervisé",
-                question: "Sur quel critère un Arbre de Décision choisit-il l'attribut pour couper (split) un nœud ?",
-                answer: "Il choisit l'attribut et la valeur qui maximisent le <strong>Gain d'Information</strong>, c'est-à-dire qui minimisent l'impureté (l'<strong>Entropie</strong>) des nœuds enfants créés."
+                question: "Sur quel critère un arbre de décision choisit-il l'attribut pour couper (split) un nœud ?",
+                answer: "Il choisit l'attribut et la valeur qui maximisent le <strong>gain d'information</strong>, c'est-à-dire qui minimisent l'impureté (l'<strong>entropie</strong>) des nœuds enfants créés."
             },
             
             // METRIQUES
             {
                 category: "Métriques",
-                question: "Donnez la formule et l'interprétation du Rappel (Sensibilité).",
-                answer: "<div class='math-formula mb-2'>Rappel = TP / (TP + FN)</div>C'est la capacité du modèle à <em>trouver tous les cas positifs réels</em> (minimiser les Faux Négatifs). Crucial en diagnostic médical."
+                question: "Donnez la formule et l'interprétation du rappel (sensibilité).",
+                answer: "<div class='math-formula mb-2'>Rappel = TP / (TP + FN)</div>C'est la capacité du modèle à <em>trouver tous les cas positifs réels</em> (minimiser les faux négatifs). Crucial en diagnostic médical."
             },
             {
                 category: "Métriques",
@@ -514,29 +628,29 @@
             // NON SUPERVISÉ
             {
                 category: "Non Supervisé",
-                question: "Décrivez les étapes itératives de l'algorithme K-Means.",
+                question: "Décrivez les étapes itératives de l'algorithme k-means.",
                 answer: "<ol class='list-decimal pl-5 space-y-1'><li>Initialisation de k centroïdes aléatoires.</li><li><strong>Assignation :</strong> Associer chaque point au centroïde le plus proche.</li><li><strong>Mise à jour :</strong> Recalculer le centroïde (moyenne des points assignés).</li><li>Répéter 2 et 3 jusqu'à convergence.</li></ol>"
             },
             {
                 category: "Non Supervisé",
-                question: "Qu'est-ce que la 'Méthode du Coude' (Elbow) ?",
+                question: "Qu'est-ce que la 'méthode du coude' (elbow) ?",
                 answer: "C'est une méthode visuelle pour choisir le nombre 'k' optimal de clusters. On trace la distorsion (SSE) en fonction de k, et on cherche le point d'inflexion (le coude) où l'erreur cesse de diminuer fortement."
             },
 
             // DEEP LEARNING / CNN
             {
                 category: "Deep Learning",
-                question: "À quoi sert la couche de 'Dropout' et comment fonctionne-t-elle ?",
+                question: "À quoi sert la couche de 'dropout' et comment fonctionne-t-elle ?",
                 answer: "Elle sert à éviter le <strong>sur-apprentissage (overfitting)</strong>. Durant l'entraînement uniquement, elle désactive aléatoirement un pourcentage de neurones (ex: 25%) à chaque époque, forçant le réseau à généraliser plutôt qu'à mémoriser."
             },
             {
                 category: "Deep Learning",
-                question: "Quels sont les rôles de la Convolution et du Max Pooling dans un CNN ?",
+                question: "Quels sont les rôles de la convolution et du max pooling dans un CNN ?",
                 answer: "<ul><li><strong>Convolution :</strong> Applique des filtres glissants pour extraire des caractéristiques spatiales (contours, textures).</li><li><strong>Max Pooling :</strong> Garde la valeur max d'un groupe de pixels. Réduit la taille spatiale et rend le modèle robuste aux petites translations.</li></ul>"
             },
             {
                 category: "Deep Learning",
-                question: "Qu'est-ce que le Unpooling (Déconvolution) dans des réseaux comme FCN ou U-Net ?",
+                question: "Qu'est-ce que l'unpooling (déconvolution) dans des réseaux comme FCN ou U-Net ?",
                 answer: "C'est l'opération inverse du pooling. Utilisée dans les réseaux de <strong>segmentation d'images</strong>, elle permet de remonter en résolution spatiale pour reconstituer une image de sortie simplifiée (masque de segmentation) à partir des filtres profonds."
             },
             {
@@ -546,7 +660,7 @@
             },
             {
                 category: "Deep Learning",
-                question: "Qu'apporte un optimiseur comme Adam ou Nadam par rapport à une Descente de Gradient classique ?",
+                question: "Qu'apporte un optimiseur comme Adam ou Nadam par rapport à une descente de gradient classique ?",
                 answer: "Ils adaptent dynamiquement le <strong>taux d'apprentissage (learning rate)</strong> pour chaque paramètre. Ils utilisent le momentum pour accélérer dans les pentes fortes et ralentir aux abords de l'optimum pour ne pas le rater."
             }
         ];
